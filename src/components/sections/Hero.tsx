@@ -129,8 +129,8 @@ const Hero = () => {
                 <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-2xl overflow-hidden border-2 border-border shadow-2xl bg-linear-to-tr from-black via-card to-secondary/20">
                   <img
                     src="/fp_profile_400.webp"
-                    srcSet="/fp_profile_300.webp 300w, /fp_profile_400.webp 400w, /fp_profile_800.webp 800w"
-                    sizes="(max-width: 480px) 300px, (max-width: 768px) 400px, 800px"
+                    srcSet="/fp_profile_300.webp 300w, /fp_profile_400.webp 400w"
+                    sizes="(max-width: 768px) 300px, 400px"
                     alt="Rezky Mubarok"
                     fetchPriority="high"
                     width={320}

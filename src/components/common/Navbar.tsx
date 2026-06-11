@@ -1,11 +1,9 @@
+import { RiMenu3Line, RiCloseLine, RiSunLine, RiMoonLine } from "react-icons/ri";
+
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import {
-  RiMenu3Line,
-  RiCloseLine,
-  RiSunLine,
-  RiMoonLine,
-} from "react-icons/ri";
+
+;
 
 const navLinks = [
   { label: "Tentang", href: "#about" },

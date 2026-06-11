@@ -1,10 +1,6 @@
-import {
-  RiGithubLine,
-  RiLinkedinLine,
-  RiInstagramLine,
-  RiFacebookCircleLine,
-  RiMailLine,
-} from "react-icons/ri";
+import { RiGithubLine, RiLinkedinLine, RiInstagramLine, RiFacebookCircleLine, RiMailLine } from "react-icons/ri";
+
+;
 
 const Footer = () => {
   const year = new Date().getFullYear();

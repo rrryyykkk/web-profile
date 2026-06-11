@@ -1,13 +1,6 @@
-import {
-  RiGithubLine,
-  RiLinkedinLine,
-  RiMailLine,
-  RiInstagramLine,
-  RiFacebookCircleLine,
-  RiArrowDownLine,
-  RiDownloadLine,
-  RiFolder3Line,
-} from "react-icons/ri";
+import { RiGithubLine, RiLinkedinLine, RiMailLine, RiInstagramLine, RiFacebookCircleLine, RiArrowDownLine, RiDownloadLine, RiFolder3Line } from "react-icons/ri";
+
+;
 import { BeamsBackground } from "../ui/beams-background";
 
 const Hero = () => {
@@ -40,9 +33,9 @@ const Hero = () => {
               {/* Description */}
               <p className="text-muted-foreground leading-relaxed max-w-lg">
                 Developer yang bersemangat membangun aplikasi web full-stack,
-                REST API, dan pengalaman web imersif dengan WebXR/WebVR.
-                Saat ini menempuh S1 Informatika di UNUGHA Cilacap
-                dengan IPK 3.85/4.00.
+                REST API, dan pengalaman web imersif dengan WebXR/WebVR. Saat
+                ini menempuh S1 Informatika di UNUGHA Cilacap dengan IPK
+                3.85/4.00.
               </p>
 
               {/* CTA buttons */}
@@ -135,29 +128,27 @@ const Hero = () => {
                 {/* Photo container */}
                 <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-2xl overflow-hidden border-2 border-border shadow-2xl bg-linear-to-tr from-black via-card to-secondary/20">
                   <img
-                    src="/fp_profile-removebg-preview_11zon.webp"
+                    src="/fp_profile_400.webp"
+                    srcSet="/fp_profile_300.webp 300w, /fp_profile_400.webp 400w, /fp_profile_800.webp 800w"
+                    sizes="(max-width: 480px) 300px, (max-width: 768px) 400px, 800px"
                     alt="Rezky Mubarok"
                     fetchPriority="high"
                     width={320}
                     height={320}
                     className="w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
-                      // Try the WebP fallback if transparent PNG fails
                       const img = e.target as HTMLImageElement;
-                      if (img.src.endsWith("fp_profile-removebg-preview.png")) {
-                        img.src = "/fp_profile.webp";
-                      } else {
-                        // Final fallback avatar if both images fail
-                        img.style.display = "none";
-                        img.parentElement!.classList.add(
-                          "flex",
-                          "items-center",
-                          "justify-center",
-                        );
+                      img.style.display = "none";
+                      img.parentElement!.classList.add(
+                        "flex",
+                        "items-center",
+                        "justify-center",
+                      );
+                      if (!img.parentElement!.querySelector(".fallback-text")) {
                         const el = document.createElement("span");
                         el.textContent = "RM";
                         el.className =
-                          "text-6xl font-bold gradient-text select-none";
+                          "fallback-text text-6xl font-bold gradient-text select-none";
                         img.parentElement!.appendChild(el);
                       }
                     }}

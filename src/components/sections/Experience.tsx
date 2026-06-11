@@ -1,8 +1,6 @@
-import {
-  RiGithubLine,
-  RiExternalLinkLine,
-  RiBriefcaseLine,
-} from "react-icons/ri";
+import { RiGithubLine, RiExternalLinkLine, RiBriefcaseLine } from "react-icons/ri";
+
+;
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 import { experience } from "../../data/experience";
 

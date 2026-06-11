@@ -45,6 +45,7 @@ export function BeamsBackground({
   intensity = "strong",
 }: AnimatedGradientBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const beamsRef = useRef<Beam[]>([]);
   const animationFrameRef = useRef<number>(0);
   const { resolvedTheme } = useTheme();
@@ -63,27 +64,31 @@ export function BeamsBackground({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const updateCanvasSize = () => {
+    const observer = new ResizeObserver((entries) => {
+      if (!entries || entries.length === 0) return;
+      const entry = entries[0];
+      const { width, height } = entry.contentRect;
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
       ctx.scale(dpr, dpr);
 
       const totalBeams = MINIMUM_BEAMS * 1.5;
       beamsRef.current = Array.from({ length: totalBeams }, () =>
         createBeam(canvas.width, canvas.height)
       );
-    };
+    });
 
-    updateCanvasSize();
-    window.addEventListener("resize", updateCanvasSize);
+    observer.observe(container);
 
     function resetBeam(beam: Beam, index: number, totalBeams: number) {
       if (!canvas) return beam;
@@ -158,7 +163,7 @@ export function BeamsBackground({
     animate();
 
     return () => {
-      window.removeEventListener("resize", updateCanvasSize);
+      observer.disconnect();
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -167,6 +172,7 @@ export function BeamsBackground({
 
   return (
     <div
+      ref={containerRef}
       className={cn(
         "relative w-full overflow-hidden transition-colors duration-500 bg-transparent dark:bg-black",
         className

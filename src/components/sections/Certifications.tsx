@@ -1,8 +1,6 @@
-import {
-  RiAwardLine,
-  RiVerifiedBadgeLine,
-  RiBookmarkLine,
-} from "react-icons/ri";
+import { RiAwardLine, RiVerifiedBadgeLine, RiBookmarkLine } from "react-icons/ri";
+
+;
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 import { certifications } from "../../data/certifications";
 

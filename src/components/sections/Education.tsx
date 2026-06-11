@@ -1,4 +1,6 @@
 import { RiGraduationCapLine, RiBookOpenLine } from "react-icons/ri";
+
+;
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 
 const educationData = [

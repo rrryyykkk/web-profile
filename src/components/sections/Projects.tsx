@@ -1,4 +1,6 @@
 import { RiGithubLine, RiExternalLinkLine, RiStarLine } from "react-icons/ri";
+
+;
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 import { projects } from "../../data/projects";
 

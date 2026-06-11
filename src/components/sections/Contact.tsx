@@ -1,16 +1,8 @@
+import { RiMailLine, RiPhoneLine, RiMapPinLine, RiGithubLine, RiLinkedinLine, RiInstagramLine, RiFacebookCircleLine, RiSendPlaneLine, RiLoader4Line, RiCheckLine } from "react-icons/ri";
+
 import { useState } from "react";
-import {
-  RiMailLine,
-  RiPhoneLine,
-  RiMapPinLine,
-  RiGithubLine,
-  RiLinkedinLine,
-  RiInstagramLine,
-  RiFacebookCircleLine,
-  RiSendPlaneLine,
-  RiLoader4Line,
-  RiCheckLine,
-} from "react-icons/ri";
+
+;
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 
 const contactInfo = [

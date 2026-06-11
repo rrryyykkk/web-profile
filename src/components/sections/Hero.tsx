@@ -1,6 +1,14 @@
-import { RiGithubLine, RiLinkedinLine, RiMailLine, RiInstagramLine, RiFacebookCircleLine, RiArrowDownLine, RiDownloadLine, RiFolder3Line } from "react-icons/ri";
+import {
+  RiGithubLine,
+  RiLinkedinLine,
+  RiMailLine,
+  RiInstagramLine,
+  RiFacebookCircleLine,
+  RiArrowDownLine,
+  RiDownloadLine,
+  RiFolder3Line,
+} from "react-icons/ri";
 
-;
 import { BeamsBackground } from "../ui/beams-background";
 
 const Hero = () => {

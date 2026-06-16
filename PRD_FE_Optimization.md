@@ -1,259 +1,314 @@
-# PRD — Frontend Performance Optimization
+# PRD: Frontend Performance Optimization
 
-**Portfolio Website — Lighthouse Audit Remediation**
-
-|             |                                            |
-| ----------- | ------------------------------------------ |
-| Tanggal     | Juni 2026                                  |
-| Versi       | 5.0 — Production Audit #5                  |
-| Stack       | React + Vite + Tailwind                    |
-| Environment | Production (`vite build` + `vite preview`) |
+**Product:** Portfolio Website (resonant-maamoul-5c6539.netlify.app)  
+**Type:** Performance Improvement  
+**Status:** In Progress  
+**Date:** 2026-06-11  
+**Author:** -
 
 ---
 
-## 1. Progress Tracker
+## 1. Background & Problem Statement
 
-| Task                            | Status     | Impact             |
-| ------------------------------- | ---------- | ------------------ |
-| OPT-00 Fix CLS light-blob-1     | ✅ Done    | —                  |
-| OPT-02 Fix react-icons          | ✅ Done    | 4 MB → 83 KB 🎉    |
-| OPT-03 Resize gambar            | ✅ Done    | 269 KB → 20 KB ✅  |
-| OPT-06 Font preload + swap      | ✅ Done    | —                  |
-| OPT-08 Lazy load sections       | ✅ Done    | Bundle split ✅    |
-| OPT-01 Production build         | ✅ Done    | Minifikasi ✅      |
-| OPT-CLS2 Fix blob-2             | ✅ Partial | CLS 0.987 → 0.709  |
-| **OPT-CLS3 Fix blob-1 animasi** | ❌ Belum   | **CLS 0.709 → ~0** |
-| **OPT-GF Hapus Google Fonts**   | ❌ Belum   | **FCP/LCP -230ms** |
-| OPT-PRELOAD Preload LCP image   | ❌ Belum   | LCP -100ms         |
+Iterasi pertama optimasi telah dilakukan dengan migrasi gambar profil ke Cloudinary CDN. Hasil audit terbaru (local preview build, score **58**) menunjukkan peningkatan signifikan pada LCP, namun masih ada beberapa isu yang perlu diselesaikan.
 
----
+### Riwayat Audit
 
-## 2. Metrics History
+| Metrik                   | Baseline (Local v1) | Baseline (Production v1) | Current (Local v2, +Cloudinary) |
+| ------------------------ | ------------------- | ------------------------ | ------------------------------- |
+| Lighthouse Score         | -                   | -                        | 58                              |
+| First Contentful Paint   | 2.1 s               | 2.1 s                    | 1.9 s                           |
+| Largest Contentful Paint | > 13 s              | > 13 s                   | **3.1 s** ✅                    |
+| Total Blocking Time      | -                   | 480 ms                   | 530 ms                          |
+| Cumulative Layout Shift  | -                   | -                        | **0.458** ❌                    |
+| Speed Index              | 11.1 s              | 19.5 s                   | -                               |
 
-| Metric           | Audit #1 Dev | Audit #3 Dev | Audit #4 Prod | **Audit #5 Prod**   | Target   |
-| ---------------- | ------------ | ------------ | ------------- | ------------------- | -------- |
-| Lighthouse Score | ~44          | ~62          | ~65-70        | **77**              | ≥ 85     |
-| CLS              | —            | 0            | 0.891         | **0.709** 🔴        | ≤ 0.1    |
-| TBT              | —            | 0 ms         | 0 ms ✅       | 0 ms ✅             | ≤ 200 ms |
-| Total JS         | ~4.2 MB      | ~4.0 MB      | ~83 KB ✅     | ~83 KB ✅           | ≤ 500 KB |
-| Render-blocking  | —            | —            | 80 ms         | **310 ms** (CSS+GF) | 0 ms     |
+**Progress:** LCP turun drastis dari >13 s ke 3.1 s berkat Cloudinary CDN + `fetchpriority="high"`. Namun CLS muncul sebagai isu baru dan TBT masih tinggi.
 
 ---
 
-## 3. Issue Breakdown — Audit #5
+## 2. Goals
 
-| Issue                               | Sumber                      | Est. Savings         | Prioritas   | Status   |
-| ----------------------------------- | --------------------------- | -------------------- | ----------- | -------- |
-| **CLS 0.709 — bg-animate-blob-1**   | `beams-background.tsx`      | **+20-25 pts score** | 🔴 CRITICAL | ❌ Belum |
-| **Google Fonts render-blocking**    | `fonts.googleapis.com`      | FCP/LCP **-230ms**   | 🔴 CRITICAL | ❌ Belum |
-| CSS render-blocking                 | `/assets/index.css` 15.5 KB | -80 ms               | 🟠 HIGH     | ❌ Belum |
-| Unused preconnect fonts.gstatic.com | `<link rel=preconnect>`     | Minor                | 🟢 MEDIUM   | ❌ Belum |
-| Gambar bisa dikompresi lebih        | `fp_profile_400.webp` 20 KB | -5.6 KB              | 🟢 LOW      | ❌ Belum |
-| Unused JS — Chrome extensions       | Loom, DevTools              | 147 KB               | ℹ️ External | Ignore   |
+- Menurunkan **LCP** ke < 2.5 s (Good threshold) — saat ini 3.1 s, tinggal sedikit lagi
+- Menurunkan **CLS** ke < 0.1 (Good threshold) — saat ini 0.458 (Poor)
+- Menurunkan **TBT** ke < 200 ms — saat ini 530 ms
+- Menghilangkan **render-blocking CSS** pada critical path
+- Mencapai Lighthouse score **> 85**
 
 ---
 
-## 4. Root Cause Analysis
+## 3. Non-Goals
 
-### 4.1 CLS 0.709 — bg-animate-blob-1 (Blocker #1)
+- Tidak menyentuh perubahan fitur atau UI
+- Tidak migrasi framework/build tool
+- Tidak mengoptimasi halaman selain halaman utama (landing/home)
 
-Sekarang giliran blob-1 yang CLS:
+---
+
+## 4. Root Cause Analysis (Updated)
+
+### 4.1 ✅ RESOLVED — LCP Element Render Delay
+
+Sebelumnya LCP didominasi Element Render Delay >12 detik. Setelah migrasi ke Cloudinary + `fetchpriority="high"`, LCP turun ke 3.1 s. LCP request discovery sudah ✅ semua:
+
+- `fetchpriority=high` applied ✅
+- Request discoverable dari initial HTML ✅
+- Tidak menggunakan `loading=lazy` ✅
+
+### 4.2 ❌ CLS Tinggi — Blob Animation Element
+
+**CLS Score: 0.458 (Poor — threshold Good: < 0.1)**
+
+Layout shift culprit:
 
 ```
 div.absolute.top-[10%].left-[5%].w-112.5.h-112.5.rounded-full
-  .bg-primary/7.blur-[120px].bg-animate-blob-1.will-change-transform
+  .bg-primary/7.blur-[120px].will-change-transform.bg-animate-blob-1
+→ Layout shift score: 0.458
 ```
 
-Pola yang sama dengan blob-2 sebelumnya. Ada `will-change-transform` tapi CLS tetap terjadi. Root cause yang paling likely: **animasi CSS mengubah posisi elemen di frame pertama** sehingga browser mendeteksinya sebagai layout shift.
+Elemen blob animasi latar belakang menyebabkan hampir seluruh CLS. Meskipun sudah pakai `will-change-transform`, elemen ini masih shifting saat halaman load. Kemungkinan penyebab:
 
-Perlu dicek: apakah semua blob (`blob-1`, `blob-2`, dst) punya animasi yang dimulai dari state yang sama dengan posisi default elemen. Kalau animasinya pakai `translate` dari nilai non-zero di keyframe `0%`, itu yang jadi CLS.
+- Elemen tidak punya dimensi eksplisit yang stabil saat render awal
+- Animasi CSS trigger layout (bukan hanya composite layer)
+- `blur-[120px]` bisa trigger reflow karena filter effect mempengaruhi bounding box
 
-### 4.2 Google Fonts Render-Blocking 230ms (Blocker #2 Baru)
+### 4.3 ❌ Gambar Profil Oversized untuk Display Size
 
-Ada request ke `fonts.googleapis.com` yang **block render selama 230ms** — ini request baru yang tidak ada di audit sebelumnya. Kemungkinan ada komponen baru yang pakai Google Fonts, atau ada `@import url('https://fonts.googleapis.com/...')` di CSS.
+```
+Uploaded:  600x800 px  (53.9 KiB via Cloudinary)
+Displayed: 283x378 px
+Est. savings: 41.9 KiB
+```
 
-Total render-blocking sekarang: CSS 80ms + Google Fonts 230ms = **310ms** — cukup signifikan untuk FCP dan LCP.
+Cloudinary sudah dipakai tapi URL transformation belum diset dengan benar — gambar masih di-serve ukuran 800px padahal displayed hanya 283px. Solusinya cukup ubah URL parameter Cloudinary.
 
-Fix: self-host font atau hapus Google Fonts import, karena Inter sudah di-self-host di `/fonts/inter-latin-wght-normal.woff2`.
+### 4.4 ❌ Render-Blocking CSS
 
-### 4.3 Unused Preconnect
+`/assets/index-CyJLhSQX.css` (15.4 KiB) masih blocking render dengan durasi **310 ms** di local — naik dari 80 ms sebelumnya (kemungkinan CSS lebih besar setelah refactor).
 
-Ada dua `<link rel=preconnect>` ke `fonts.googleapis.com` dan `fonts.gstatic.com` yang di-flag sebagai unused. Ini terkait langsung dengan isu Google Fonts di atas — kalau Google Fonts dihapus, preconnect-nya juga harus ikut dihapus.
+### 4.5 ❌ Total Blocking Time Masih Tinggi
+
+TBT 530 ms, didominasi:
+
+```
+Main-thread work breakdown:
+  Other:                    2,129 ms
+  Script Evaluation:        1,381 ms
+  Style & Layout:             827 ms
+  Script Parsing & Compile:   193 ms
+  Rendering:                  148 ms
+```
+
+Sumber JS terbesar:
+
+- `vendor-react-*.js` (67.5 KiB, 1,503 ms CPU) — unused ~22.8 KiB
+- `index-BIqLdo5b.js` (15.83 KiB, 873 ms CPU)
+
+Forced reflow masih ada dari `vendor-react-*.js:2` (65 ms) dan `index-BIqLdo5b.js:2` (9 ms).
+
+### 4.6 ❌ Non-Composited Animations
+
+**22 animated elements** yang tidak berjalan di compositor thread. Ini menyebabkan main thread harus terlibat setiap frame animasi → berkontribusi ke TBT dan jank.
+
+Animasi yang aman di compositor: hanya `transform` dan `opacity`. Animasi lain (width, height, top, left, background, blur, dll.) trigger layout/paint.
 
 ---
 
-## 5. Task List — Menuju 85+
+## 5. Proposed Solutions (Updated)
 
-### Harus Dikerjakan 🔴 (Estimasi: 30-60 menit)
+### P0 — Wajib (Dampak Tinggi)
 
-| Task ID      | Deskripsi                          | Teknik                            | Target         | Effort |
-| ------------ | ---------------------------------- | --------------------------------- | -------------- | ------ |
-| **OPT-CLS3** | **Fix CLS semua blob animasi**     | Fix keyframe 0% = posisi default  | CLS → ≤ 0.1    | Low    |
-| **OPT-GF**   | **Hapus Google Fonts / self-host** | Remove `@import` Google Fonts     | FCP/LCP -230ms | Low    |
-| **OPT-PC**   | **Hapus unused preconnect**        | Remove `<link rel=preconnect>` GF | Clean warning  | Low    |
+#### 5.1 Fix CLS — Stabilkan Blob Animation Element
 
-### Nice to Have 🟡 (Estimasi: 30 menit)
+**Masalah:** `div` blob animasi shift saat load dengan CLS score 0.458.
 
-| Task ID     | Deskripsi                       | Teknik                        | Target     | Effort |
-| ----------- | ------------------------------- | ----------------------------- | ---------- | ------ |
-| OPT-PRELOAD | Preload LCP image di index.html | `<link rel=preload as=image>` | LCP -100ms | Low    |
-| OPT-IMG2    | Tingkatkan kompresi gambar      | quality 75 dari 82            | -5.6 KB    | Low    |
+**Fix opsi A — Reserve space eksplisit:**
+Pastikan elemen blob punya `position: absolute` dan dimensi yang tidak berubah saat load. Jangan biarkan ada property yang berubah dari default ke animated value di frame pertama.
 
----
-
-## 6. Implementation Detail
-
-### OPT-CLS3: Fix Semua Blob Animasi
-
-Problem: animasi blob mulai dari posisi/scale berbeda di keyframe `0%`, browser baca itu sebagai shift.
-
-**Step 1** — Cek semua keyframe animasi blob di CSS/Tailwind config:
-
-```css
-/* Cari di tailwind.config.ts atau index.css */
-@keyframes blob-1 { ... }
-@keyframes blob-2 { ... }
+```jsx
+// Pastikan initial state = animated state
+// Jangan animasikan dari 'tidak ada' ke 'ada'
+<div
+  className="absolute top-[10%] left-[5%] w-[112.5px] h-[112.5px] 
+             rounded-full bg-primary/7 blur-[120px] will-change-transform"
+  style={{ transform: "translateZ(0)" }} // force GPU layer dari awal
+/>
 ```
 
-**Fix** — Pastikan `0%` dan `100%` identik, dan nilai `0%` = posisi default elemen (tidak ada translate/scale):
+**Fix opsi B — Pindahkan blob ke `position: fixed` atau pastikan tidak mempengaruhi layout:**
+
+Elemen `absolute` masih bisa mempengaruhi layout jika parent-nya tidak punya `position: relative` yang stabil. Pastikan wrapper punya `overflow: hidden` dan dimensi fixed.
+
+**Fix opsi C — Delay animasi hingga setelah LCP:**
+
+```jsx
+// Sembunyikan blob sampai halaman selesai load
+const [mounted, setMounted] = useState(false);
+useEffect(() => {
+  requestIdleCallback(() => setMounted(true));
+}, []);
+
+return mounted ? <BlobBackground /> : null;
+```
+
+#### 5.2 Fix Cloudinary URL — Responsive Image
+
+Gambar profil masih di-serve 600x800 padahal displayed 283x378. Ubah URL Cloudinary untuk auto-resize:
+
+```
+// Sebelum (tidak efisien)
+.../v178.../fp_profile_800_hmpzfd.webp
+
+// Sesudah — tambahkan transformation parameter
+.../c_fill,w_400,h_533,q_auto,f_auto/fp_profile_800_hmpzfd.webp
+```
+
+Parameter:
+
+- `c_fill` — crop mode fill
+- `w_400,h_533` — 2x dari displayed size (283x378) untuk retina
+- `q_auto` — kualitas otomatis
+- `f_auto` — format terbaik (AVIF/WebP by browser)
+
+Target size: < 12 KiB (dari 53.9 KiB saat ini).
+
+#### 5.3 Fix Non-Composited Animations
+
+Audit 22 animated elements. Animasi yang menyebabkan non-composited warning biasanya mengubah property selain `transform`/`opacity`.
 
 ```css
-/* ❌ SEBELUM — keyframe 0% beda dari posisi default */
-@keyframes blob-1 {
+/* ❌ Trigger layout — non composited */
+@keyframes blob {
   0% {
-    transform: translate(20px, -10px) scale(1.05);
+    width: 100px;
   }
   50% {
-    transform: translate(-20px, 20px) scale(0.95);
-  }
-  100% {
-    transform: translate(20px, -10px) scale(1.05);
+    width: 150px;
   }
 }
 
-/* ✅ SESUDAH — 0% selalu dimulai dari posisi default (no transform) */
-@keyframes blob-1 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
+/* ✅ Compositor only */
+@keyframes blob {
+  0% {
+    transform: scale(1);
   }
-  33% {
-    transform: translate(20px, -15px) scale(1.05);
-  }
-  66% {
-    transform: translate(-15px, 20px) scale(0.95);
+  50% {
+    transform: scale(1.5);
   }
 }
 ```
 
-**Kalau masih CLS** — disable animasi sampai setelah first paint:
-
-```tsx
-// beams-background.tsx
-const [mounted, setMounted] = useState(false)
-
-useEffect(() => {
-  // Delay animasi sampai setelah hydration
-  const timer = setTimeout(() => setMounted(true), 100)
-  return () => clearTimeout(timer)
-}, [])
-
-// Blob element
-<div
-  className={`absolute top-[10%] left-[5%] w-112.5 h-112.5
-    rounded-full bg-primary/7 blur-[120px] will-change-transform
-    ${mounted ? 'bg-animate-blob-1' : ''}`}
-  aria-hidden="true"
-/>
-```
+Untuk blur animation: ganti `filter: blur()` animation dengan `transform: scale()` + static blur, karena animating filter tidak composited.
 
 ---
 
-### OPT-GF: Hapus Google Fonts Render-Blocking
+### P1 — Disarankan (Dampak Sedang)
 
-Cari dan hapus semua referensi Google Fonts — Inter sudah di-self-host, tidak perlu Google Fonts lagi.
+#### 5.4 Defer / Inline Critical CSS
 
-**Cek di `index.html`:**
-
-```html
-<!-- ❌ Hapus ini kalau ada -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-  rel="stylesheet"
-/>
-```
-
-**Cek di `index.css` atau file CSS lain:**
-
-```css
-/* ❌ Hapus ini kalau ada */
-@import url("https://fonts.googleapis.com/css2?family=Inter...");
-```
-
-**Pastikan self-hosted font sudah dikonfigurasi dengan benar:**
-
-```css
-/* index.css — pastikan ini ada dan path-nya benar */
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2");
-  unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
-    U+2020, U+2022, U+2026, U+2030, U+2039-203A, U+2044, U+20AC, U+2122, U+2212,
-    U+2215;
-}
-```
-
-**Hapus juga preconnect yang jadi unused setelah Google Fonts dihapus:**
+`/assets/index-CyJLhSQX.css` (15.4 KiB) masih blocking 310 ms.
 
 ```html
-<!-- ❌ Hapus kedua baris ini dari index.html -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-```
+<!-- Inline critical CSS -->
+<style>
+  /* above-fold styles saja */
+</style>
 
----
-
-### OPT-PRELOAD: Preload LCP Image
-
-```html
-<!-- index.html — taruh di <head>, sebelum CSS -->
+<!-- Defer non-critical -->
 <link
   rel="preload"
-  as="image"
-  href="/fp_profile_400.webp"
-  fetchpriority="high"
+  href="/assets/index.css"
+  as="style"
+  onload="this.onload=null;this.rel='stylesheet'"
+/>
+<noscript><link rel="stylesheet" href="/assets/index.css" /></noscript>
+```
+
+Tools: `vite-plugin-critical` untuk otomasi ekstraksi critical CSS.
+
+#### 5.5 Preload Font
+
+Font `inter-latin-wght-normal.woff2` belum di-preload.
+
+```html
+<link
+  rel="preload"
+  href="/fonts/inter-latin-wght-normal.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
 />
 ```
 
----
+#### 5.6 Tambah Preconnect ke Cloudinary
 
-## 7. Expected Results
-
-| Metric               | Sekarang (Prod, Skor 77) | Setelah Fix CLS + GF | Setelah Semua | Target   |
-| -------------------- | ------------------------ | -------------------- | ------------- | -------- |
-| CLS                  | 0.709                    | **≤ 0.1**            | ≤ 0.05        | ≤ 0.1    |
-| Render-blocking      | 310 ms                   | **~80 ms**           | ~0 ms         | 0 ms     |
-| TBT                  | 0 ms ✅                  | 0 ms ✅              | 0 ms ✅       | ≤ 200 ms |
-| Total JS             | ~83 KB ✅                | ~83 KB ✅            | ~83 KB ✅     | ≤ 500 KB |
-| **Lighthouse Score** | **77**                   | **~88-92**           | **≥ 90**      | **≥ 85** |
+```html
+<link rel="preconnect" href="https://res.cloudinary.com" />
+```
 
 ---
 
-## 8. Urutan Eksekusi Sekarang
+### P2 — Nice to Have
 
-```
-1. OPT-GF   →  Hapus Google Fonts import + preconnect (10 menit)
-2. OPT-CLS3 →  Fix keyframe blob-1 animasi (20 menit)
-3. vite build && vite preview → audit ulang
-4. Kalau skor ≥ 85 → DONE ✅
-5. Kalau CLS masih ada → pakai delay mounted trick
-6. OPT-PRELOAD → preload LCP image (5 menit)
+#### 5.7 Tree-shake Vendor Bundle
+
+`vendor-react-*.js` (67.5 KiB) masih ada ~22.8 KiB unused. Audit dengan:
+
+```bash
+npx vite-bundle-visualizer
 ```
 
-> 💡 **Skor 77 → 85+ tinggal 2 fix**: hapus Google Fonts (-230ms render blocking) dan fix animasi blob-1 (CLS 0.709 → 0). Dua hal ini estimasi ~30 menit total.
+Pertimbangkan manual chunk splitting di `vite.config.ts`:
+
+```ts
+build: {
+  rollupOptions: {
+    output: {
+      manualChunks: {
+        'react-core': ['react', 'react-dom'],
+        'animations': ['framer-motion'], // jika dipakai
+      }
+    }
+  }
+}
+```
+
+---
+
+## 6. Implementation Plan (Updated)
+
+| No    | Task                                             | Priority | Effort | Status  |
+| ----- | ------------------------------------------------ | -------- | ------ | ------- |
+| ~~1~~ | ~~Migrasi gambar ke Cloudinary CDN~~             | ~~P0~~   | ~~S~~  | ✅ Done |
+| ~~2~~ | ~~Tambah `fetchpriority="high"` pada LCP image~~ | ~~P0~~   | ~~S~~  | ✅ Done |
+| 3     | Fix CLS — stabilkan blob animation element       | P0       | M      | 🔲 Todo |
+| 4     | Fix Cloudinary URL — responsive transformation   | P0       | S      | 🔲 Todo |
+| 5     | Fix non-composited animations (22 elements)      | P0       | M      | 🔲 Todo |
+| 6     | Defer / inline critical CSS                      | P1       | M      | 🔲 Todo |
+| 7     | Preload font woff2                               | P1       | S      | 🔲 Todo |
+| 8     | Preconnect ke Cloudinary                         | P1       | S      | 🔲 Todo |
+| 9     | Tree-shake vendor bundle                         | P2       | L      | 🔲 Todo |
+
+**Estimasi effort:** S = < 1 jam, M = 1–4 jam, L = > 4 jam
+
+---
+
+## 7. Success Metrics
+
+| Metrik           | Baseline v1 | Current v2 | Target   |
+| ---------------- | ----------- | ---------- | -------- |
+| Lighthouse Score | -           | 58         | > 85     |
+| FCP              | 2.1 s       | 1.9 s      | < 1.5 s  |
+| LCP              | > 13 s      | 3.1 s      | < 2.5 s  |
+| TBT              | 480 ms      | 530 ms     | < 200 ms |
+| CLS              | -           | 0.458      | < 0.1    |
+
+---
+
+## 8. Notes
+
+- Audit v2 dilakukan di **local preview build** dengan ekstensi aktif (Loom, React DevTools) — TBT real di production kemungkinan lebih rendah ~200 ms
+- Unused JS dari ekstensi browser bukan tanggung jawab kita
+- Setelah implementasi P0, lakukan audit ulang di **production + incognito** untuk hasil yang akurat
+- CLS 0.458 adalah isu kritis yang harus diselesaikan sebelum deploy production — ini termasuk kategori **Poor** menurut Core Web Vitals Google

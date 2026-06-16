@@ -57,7 +57,7 @@ const Hero = () => {
                   Lihat Proyek
                 </a>
                 <a
-                  href="/cv.pdf"
+                  href="/CV_update_indo.pdf"
                   id="hero-download-cv"
                   download
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
@@ -134,16 +134,21 @@ const Hero = () => {
                 <div className="absolute inset-0 rounded-2xl border border-secondary/20 -rotate-3 scale-102" />
 
                 {/* Photo container */}
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-2xl overflow-hidden border-2 border-border shadow-2xl bg-linear-to-tr from-black via-card to-secondary/20">
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-2xl overflow-hidden border-2 border-border shadow-2xl">
                   <img
-                    src="/fp_profile_400.webp"
-                    srcSet="/fp_profile_300.webp 300w, /fp_profile_400.webp 400w"
-                    sizes="(max-width: 768px) 300px, 400px"
+                    src="https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_320/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp"
+                    srcSet="
+                      https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_320/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp 320w,
+                      https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_640/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp 640w
+                    "
+                    sizes="(max-width: 640px) 320px, 640px"
                     alt="Rezky Mubarok"
                     fetchPriority="high"
+                    loading="eager"
+                    decoding="async"
                     width={320}
                     height={320}
-                    className="w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-contain scale-105 hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
                       const img = e.target as HTMLImageElement;
                       img.style.display = "none";
@@ -167,10 +172,6 @@ const Hero = () => {
                 <div className="absolute -bottom-4 -left-4 px-3 py-2 rounded-xl border border-border bg-card/90 backdrop-blur-sm shadow-lg flex items-center gap-2 text-xs font-medium">
                   <span className="text-accent">✦</span>
                   Full-Stack Dev
-                </div>
-                <div className="absolute -top-4 -right-4 px-3 py-2 rounded-xl border border-border bg-card/90 backdrop-blur-sm shadow-lg flex items-center gap-2 text-xs font-medium">
-                  <span className="text-primary">◎</span>
-                  GPA 3.85/4.00
                 </div>
               </div>
             </div>

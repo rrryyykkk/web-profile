@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 
 export function useIntersectionObserver(
-  options: IntersectionObserverInit = {}
+  options: IntersectionObserverInit = {},
 ): [React.RefObject<HTMLDivElement | null>, boolean] {
   const ref = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  // Stabilize the options object so it doesn't re-create the observer on every render,
+  // which would trigger forced reflows via IntersectionObserver churn.
+  const thresholdRef = useRef(options.threshold ?? 0.1);
+  const rootMarginRef = useRef(options.rootMargin ?? "0px");
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -14,7 +19,7 @@ export function useIntersectionObserver(
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, ...options }
+      { threshold: thresholdRef.current, rootMargin: rootMarginRef.current },
     );
 
     const el = ref.current;
@@ -22,7 +27,7 @@ export function useIntersectionObserver(
     return () => {
       if (el) observer.unobserve(el);
     };
-  }, [options]);
+  }, []);
 
   return [ref, isVisible];
 }

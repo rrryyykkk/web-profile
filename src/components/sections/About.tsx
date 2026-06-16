@@ -26,8 +26,7 @@ const About = () => {
             {/* Text */}
             <div className="space-y-5">
               <h2 className="text-3xl sm:text-4xl font-bold">
-                Semangat{" "}
-                <span className="gradient-text">membangun web</span>
+                Semangat <span className="gradient-text">membangun web</span>
               </h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>

@@ -1,8 +1,18 @@
-import { RiMailLine, RiPhoneLine, RiMapPinLine, RiGithubLine, RiLinkedinLine, RiInstagramLine, RiFacebookCircleLine, RiSendPlaneLine, RiLoader4Line, RiCheckLine } from "react-icons/ri";
+import {
+  RiMailLine,
+  RiPhoneLine,
+  RiMapPinLine,
+  RiGithubLine,
+  RiLinkedinLine,
+  RiInstagramLine,
+  RiFacebookCircleLine,
+  RiSendPlaneLine,
+  RiLoader4Line,
+  RiCheckLine,
+} from "react-icons/ri";
 
 import { useState } from "react";
 
-;
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 
 const contactInfo = [
@@ -62,7 +72,7 @@ const Contact = () => {
   const [status, setStatus] = useState<FormStatus>("idle");
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -106,8 +116,7 @@ const Contact = () => {
 
           <div className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold mb-3">
-              Mari buat sesuatu{" "}
-              <span className="gradient-text">bersama.</span>
+              Mari buat sesuatu <span className="gradient-text">bersama.</span>
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
               Saya terbuka untuk peluang full-time, freelance, maupun kolaborasi
@@ -219,20 +228,20 @@ const Contact = () => {
               </div>
 
               <div className="space-y-1.5">
-                  <label
-                    htmlFor="message"
-                    className="text-xs font-medium text-muted-foreground"
-                  >
-                    Pesan
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    required
-                    rows={5}
-                    value={form.message}
-                    onChange={handleChange}
-                    placeholder="Halo Rezky, saya ingin berdiskusi tentang..."
+                <label
+                  htmlFor="message"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Pesan
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  required
+                  rows={5}
+                  value={form.message}
+                  onChange={handleChange}
+                  placeholder="Halo Rezky, saya ingin berdiskusi tentang..."
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors resize-none"
                 />
               </div>
@@ -253,16 +262,16 @@ const Contact = () => {
                 {status === "loading"
                   ? "Mengirim..."
                   : status === "success"
-                  ? "Pesan Terkirim!"
-                  : status === "error"
-                  ? "Gagal, coba lagi"
-                  : "Kirim Pesan"}
+                    ? "Pesan Terkirim!"
+                    : status === "error"
+                      ? "Gagal, coba lagi"
+                      : "Kirim Pesan"}
               </button>
 
               {status === "error" && (
                 <p className="text-xs text-red-400 text-center">
-                  Gagal mengirim pesan. Silakan coba lagi atau hubungi via
-                  email langsung.
+                  Gagal mengirim pesan. Silakan coba lagi atau hubungi via email
+                  langsung.
                 </p>
               )}
             </form>

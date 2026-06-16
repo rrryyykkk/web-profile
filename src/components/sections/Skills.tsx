@@ -1,6 +1,15 @@
-import { RiCodeLine, RiComputerLine, RiServerLine, RiPaletteLine, RiDatabase2Line, RiAppStoreLine, RiFlashlightLine, RiCloudLine, RiToolsLine } from "react-icons/ri";
+import {
+  RiCodeLine,
+  RiComputerLine,
+  RiServerLine,
+  RiPaletteLine,
+  RiDatabase2Line,
+  RiAppStoreLine,
+  RiFlashlightLine,
+  RiCloudLine,
+  RiToolsLine,
+} from "react-icons/ri";
 
-;
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 import { skills } from "../../data/skills";
 

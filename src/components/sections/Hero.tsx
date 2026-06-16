@@ -136,10 +136,10 @@ const Hero = () => {
                 {/* Photo container */}
                 <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-2xl overflow-hidden border-2 border-border shadow-2xl">
                   <img
-                    src="https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_320/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp"
+                    src="https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_284,h_378,c_fit/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp"
                     srcSet="
-                      https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_320/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp 320w,
-                      https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_640/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp 640w
+                      https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_284,h_378,c_fit/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp 320w,
+                      https://res.cloudinary.com/dg3v7ljbu/image/upload/f_auto,q_auto,w_568,h_756,c_fit/v1781172779/fp_profile-removebg-preview_11zon_ggcn8d.webp 640w
                     "
                     sizes="(max-width: 640px) 320px, 640px"
                     alt="Rezky Mubarok"

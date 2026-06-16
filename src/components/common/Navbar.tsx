@@ -1,9 +1,12 @@
-import { RiMenu3Line, RiCloseLine, RiSunLine, RiMoonLine } from "react-icons/ri";
+import {
+  RiMenu3Line,
+  RiCloseLine,
+  RiSunLine,
+  RiMoonLine,
+} from "react-icons/ri";
 
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-
-;
 
 const navLinks = [
   { label: "Tentang", href: "#about" },
@@ -72,7 +75,7 @@ const Navbar = () => {
           {mounted && (
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (

@@ -1,6 +1,9 @@
-import { RiAwardLine, RiVerifiedBadgeLine, RiBookmarkLine } from "react-icons/ri";
+import {
+  RiAwardLine,
+  RiVerifiedBadgeLine,
+  RiBookmarkLine,
+} from "react-icons/ri";
 
-;
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 import { certifications } from "../../data/certifications";
 
@@ -43,7 +46,8 @@ const Certifications = () => {
 
           <div className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold">
-              Sertifikat <span className="gradient-text">&amp; Penghargaan</span>
+              Sertifikat{" "}
+              <span className="gradient-text">&amp; Penghargaan</span>
             </h2>
           </div>
 

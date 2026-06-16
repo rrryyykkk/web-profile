@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import Footer from "./components/common/Footer";
 import Navbar from "./components/common/Navbar";
 import Hero from "./components/sections/Hero";
+import { Toaster } from "./components/ui/sonner";
 
 // Lazy load sections below the fold
 const About = lazy(() => import("./components/sections/About"));
@@ -21,6 +22,7 @@ function SectionSkeleton() {
 const App = () => {
   return (
     <div className="min-h-screen bg-transparent dark:bg-background text-foreground relative overflow-hidden bg-dot-pattern">
+      <Toaster position="bottom-right" expand={true} richColors />
       {/* Dark mode: premium ambient blobs */}
       <div
         className="dark:block hidden fixed inset-0 pointer-events-none overflow-hidden -z-10"

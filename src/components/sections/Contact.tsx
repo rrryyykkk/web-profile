@@ -11,9 +11,11 @@ import {
   RiCheckLine,
 } from "react-icons/ri";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
 
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
+import { toast } from "sonner";
 
 const contactInfo = [
   {
@@ -26,7 +28,7 @@ const contactInfo = [
     icon: <RiPhoneLine size={18} />,
     label: "Telepon",
     value: "+62 895 0450 0108",
-    href: "tel:+6289504500108",
+    href: "https://wa.me/6289504500108",
   },
   {
     icon: <RiMapPinLine size={18} />,
@@ -77,35 +79,51 @@ const Contact = () => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const sendEmail = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formRef.current) return;
+
+    // ✅ Set loading sebelum kirim
     setStatus("loading");
+    const toastId = toast.loading("Mengirim pesan...");
 
-    try {
-      const res = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+    // ✅ Update hidden time input
+    const timeInput = formRef.current.querySelector(
+      'input[name="time"]',
+    ) as HTMLInputElement;
+    if (timeInput) {
+      timeInput.value = new Date().toLocaleString("id-ID", {
+        dateStyle: "full",
+        timeStyle: "short",
       });
-
-      if (res.ok) {
-        setStatus("success");
-        setForm({ name: "", email: "", message: "" });
-      } else {
-        setStatus("error");
-      }
-    } catch {
-      setStatus("error");
     }
 
-    setTimeout(() => setStatus("idle"), 4000);
+    const SERVICE_ID = import.meta.env.VITE_SERVICE_ID;
+    const TEMPLATE_ID = import.meta.env.VITE_TEMPLATE_ID;
+    const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
+
+    emailjs
+      .sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, PUBLIC_KEY)
+      .then(() => {
+        toast.success("Pesan anda berhasil terkirim!", { id: toastId });
+        formRef.current?.reset();
+        setForm({ name: "", email: "", message: "" });
+        setStatus("success");
+        console.log("form:", form);
+        setTimeout(() => setStatus("idle"), 2000);
+      })
+      .catch(() => {
+        toast.error("Gagal mengirim pesan.", { id: toastId });
+        setStatus("error");
+      });
   };
 
   return (
     <section id="contact" className="py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={ref} className={`fade-in-up ${visible ? "visible" : ""}`}>
-          {/* Section header */}
           <div className="flex items-center gap-4 mb-8">
             <div className="h-px flex-1 bg-border max-w-15" />
             <span className="text-xs font-semibold tracking-[0.2em] uppercase text-primary">
@@ -125,9 +143,8 @@ const Contact = () => {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12">
-            {/* Left: contact info + socials */}
+            {/* Left */}
             <div className="space-y-8">
-              {/* Contact info cards */}
               <div className="space-y-3">
                 {contactInfo.map((item) => (
                   <div
@@ -156,7 +173,6 @@ const Contact = () => {
                 ))}
               </div>
 
-              {/* Social links */}
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-widest mb-4">
                   Temukan saya di
@@ -182,12 +198,16 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Right: contact form */}
+            {/* Right */}
             <form
-              onSubmit={handleSubmit}
+              ref={formRef}
+              onSubmit={sendEmail}
               id="contact-form"
               className="rounded-2xl border border-border bg-card p-6 space-y-5"
             >
+              {/* ✅ Hidden input time */}
+              <input type="hidden" name="time" />
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label
@@ -250,7 +270,7 @@ const Contact = () => {
                 type="submit"
                 id="contact-submit"
                 disabled={status === "loading" || status === "success"}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition-all glow-primary"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition-all glow-primary cursor-pointer"
               >
                 {status === "loading" && (
                   <RiLoader4Line size={16} className="animate-spin" />
